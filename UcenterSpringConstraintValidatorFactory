@@ -1,0 +1,33 @@
+package com.zeng.ucenter.biz.MethodInterceptor;
+
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.validation.ConstraintValidator;
+
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.validation.beanvalidation.SpringConstraintValidatorFactory;
+
+public class UcenterSpringConstraintValidatorFactory extends SpringConstraintValidatorFactory {
+    @SuppressWarnings("rawtypes")
+    private ConcurrentHashMap<Class, Object> instanceCacheMap = new ConcurrentHashMap<Class, Object>();
+
+    /**
+     * Create a new SpringConstraintValidatorFactory for the given BeanFactory.
+     * @param beanFactory the target BeanFactory
+     */
+    public UcenterSpringConstraintValidatorFactory(AutowireCapableBeanFactory beanFactory) {
+        super(beanFactory);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends ConstraintValidator<?, ?>> T getInstance(Class<T> key) {
+        T instanceCache = (T) instanceCacheMap.get(key);
+        if (null != instanceCache) {
+            return instanceCache;
+        }
+        T instance = super.getInstance(key);
+        instanceCacheMap.put(key, instance);
+        return instance;
+    }
+}
